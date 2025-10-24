@@ -119,60 +119,92 @@
 
                 <!-- İSTATİSTİK KARTLARI -->
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-key"></i></div>
+                    <div class="stat-card stat-card-blue">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-key"></i>
+                        </div>
                         <div class="stat-info">
-                            <h3 id="total-licenses">0</h3>
-                            <p>Toplam Lisans</p>
+                            <p class="stat-label">Toplam Lisans</p>
+                            <h3 id="total-licenses" class="stat-value">
+                                <span class="loading-spinner"></span>
+                            </h3>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-card stat-card-green">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
                         <div class="stat-info">
-                            <h3 id="active-licenses">0</h3>
-                            <p>Aktif Lisans</p>
+                            <p class="stat-label">Aktif Lisans</p>
+                            <h3 id="active-licenses" class="stat-value">
+                                <span class="loading-spinner"></span>
+                            </h3>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-card stat-card-purple">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-users"></i>
+                        </div>
                         <div class="stat-info">
-                            <h3 id="total-users">0</h3>
-                            <p>Toplam Kullanıcı</p>
+                            <p class="stat-label">Toplam Kullanıcı</p>
+                            <h3 id="total-users" class="stat-value">
+                                <span class="loading-spinner"></span>
+                            </h3>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-circle" style="color: #10b981;"></i></div>
+                    <div class="stat-card stat-card-cyan">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-signal"></i>
+                        </div>
                         <div class="stat-info">
-                            <h3 id="online-users">0</h3>
-                            <p>Online Kullanıcı</p>
+                            <p class="stat-label">Online Kullanıcı</p>
+                            <h3 id="online-users" class="stat-value">
+                                <span class="loading-spinner"></span>
+                            </h3>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-receipt"></i></div>
+                    <div class="stat-card stat-card-orange">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-receipt"></i>
+                        </div>
                         <div class="stat-info">
-                            <h3 id="today-receipts">0</h3>
-                            <p>Bugün Kesilen Fiş</p>
+                            <p class="stat-label">Bugün Kesilen Fiş</p>
+                            <h3 id="today-receipts" class="stat-value">
+                                <span class="loading-spinner"></span>
+                            </h3>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-card stat-card-yellow">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-coins"></i>
+                        </div>
                         <div class="stat-info">
-                            <h3 id="today-amount">0 ₺</h3>
-                            <p>Bugünkü Ciro</p>
+                            <p class="stat-label">Bugünkü Ciro</p>
+                            <h3 id="today-amount" class="stat-value">
+                                <span class="loading-spinner"></span>
+                            </h3>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="stat-card stat-card-pink">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
                         <div class="stat-info">
-                            <h3 id="month-receipts">0</h3>
-                            <p>Bu Ay Kesilen Fiş</p>
+                            <p class="stat-label">Bu Ay Kesilen Fiş</p>
+                            <h3 id="month-receipts" class="stat-value">
+                                <span class="loading-spinner"></span>
+                            </h3>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+                    <div class="stat-card stat-card-red">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
                         <div class="stat-info">
-                            <h3 id="month-amount">0 ₺</h3>
-                            <p>Aylık Ciro</p>
+                            <p class="stat-label">Aylık Ciro</p>
+                            <h3 id="month-amount" class="stat-value">
+                                <span class="loading-spinner"></span>
+                            </h3>
                         </div>
                     </div>
                 </div>
@@ -384,8 +416,9 @@
                 <!-- Dinamik içerik -->
             </div>
             <div class="modal-footer">
-                <button id="add-days-btn" class="btn btn-success">+ Gün Ekle</button>
-                <button id="suspend-license-btn" class="btn btn-warning">Askıya Al</button>
+                <button id="add-days-btn" class="btn btn-success"><i class="fas fa-plus"></i> Gün Ekle</button>
+                <button id="suspend-license-btn" class="btn btn-warning"><i class="fas fa-pause"></i> Askıya Al</button>
+                <button id="delete-license-btn" class="btn btn-danger"><i class="fas fa-trash"></i> Sil</button>
                 <button class="btn btn-secondary modal-close">Kapat</button>
             </div>
         </div>
