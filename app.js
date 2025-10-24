@@ -267,14 +267,14 @@ async function loadLicenses() {
         licenses.forEach(license => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 6px; font-size: 0.875rem;">${license.license_key}</code></td>
+                <td><code style="background: rgba(59,130,246,0.1); padding: 4px 8px; border-radius: 6px; font-size: 0.875rem;">${license.license_key}</code></td>
                 <td>${license.company_name || '-'}</td>
                 <td><span class="badge badge-${license.status}">${getStatusText(license.status)}</span></td>
                 <td>${license.days_remaining || 0} gün</td>
                 <td>${license.active_devices || 0} / ${license.max_devices}</td>
                 <td>${formatDate(license.created_at)}</td>
                 <td>
-                    <button class="btn btn-sm btn-primary" onclick="viewLicense('${license.id}')">Detay</button>
+                    <button class="btn btn-sm btn-primary" onclick="window.viewLicenseDetail(${license.id})"><i class="fas fa-eye"></i> Detay</button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -573,3 +573,38 @@ function togglePassword() {
 
 // Make togglePassword global
 window.togglePassword = togglePassword;
+
+// View license detail
+async function viewLicenseDetail(licenseId) {
+    try {
+        const response = await fetchAPI(`/api/admin/licenses/${licenseId}`);
+        const license = response.data;
+        
+        const modal = document.getElementById('license-detail-modal');
+        const content = document.getElementById('license-detail-content');
+        
+        content.innerHTML = `
+            <div style="display: grid; gap: 1rem;">
+                <div><strong>Lisans Anahtarı:</strong> <code>${license.license_key}</code></div>
+                <div><strong>Şirket:</strong> ${license.company_name || '-'}</div>
+                <div><strong>E-posta:</strong> ${license.contact_email || '-'}</div>
+                <div><strong>Telefon:</strong> ${license.contact_phone || '-'}</div>
+                <div><strong>Durum:</strong> <span class="badge badge-${license.status}">${getStatusText(license.status)}</span></div>
+                <div><strong>Kalan Gün:</strong> ${license.days_remaining || 0} gün</div>
+                <div><strong>Maksimum Cihaz:</strong> ${license.max_devices}</div>
+                <div><strong>Aktif Cihaz:</strong> ${license.active_devices || 0}</div>
+                <div><strong>Oluşturulma:</strong> ${formatDateTime(license.created_at)}</div>
+                <div><strong>Son Kontrol:</strong> ${formatDateTime(license.last_check)}</div>
+                <div><strong>Notlar:</strong> ${license.notes || '-'}</div>
+            </div>
+        `;
+        
+        showModal('license-detail-modal');
+        
+    } catch (error) {
+        console.error('License detail error:', error);
+        alert('Lisans detayı yüklenemedi');
+    }
+}
+
+window.viewLicenseDetail = viewLicenseDetail;
