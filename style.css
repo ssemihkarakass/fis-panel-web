@@ -651,15 +651,15 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 2rem;
-    background: currentColor;
-    color: white !important;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
     flex-shrink: 0;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .stat-icon-wrapper .material-icons {
     font-size: 2.5rem;
-    color: white !important;
+    color: currentColor !important;
     display: block;
     line-height: 1;
 }
