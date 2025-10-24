@@ -187,9 +187,16 @@ body {
 .input-icon {
     position: absolute;
     left: 1rem;
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     z-index: 1;
-    opacity: 0.6;
+    color: #667eea;
+    opacity: 0.7;
+    transition: var(--transition);
+}
+
+.input-wrapper:focus-within .input-icon {
+    opacity: 1;
+    transform: scale(1.1);
 }
 
 .input-wrapper input {
@@ -202,15 +209,19 @@ body {
     right: 1rem;
     background: none;
     border: none;
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     cursor: pointer;
+    color: #667eea;
     opacity: 0.6;
     transition: var(--transition);
     z-index: 1;
+    padding: 0.5rem;
+    border-radius: 6px;
 }
 
 .toggle-password:hover {
     opacity: 1;
+    background: rgba(102, 126, 234, 0.1);
 }
 
 /* Remember & Forgot */
@@ -259,11 +270,11 @@ body {
     padding: 1rem;
 }
 
-.btn-login svg {
+.btn-login i {
     transition: var(--transition);
 }
 
-.btn-login:hover svg {
+.btn-login:hover i {
     transform: translateX(4px);
 }
 

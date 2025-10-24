@@ -560,14 +560,14 @@ function convertToCSV(data) {
 // Toggle password visibility
 function togglePassword() {
     const passwordInput = document.getElementById('password');
-    const toggleBtn = document.querySelector('.toggle-password');
+    const toggleBtn = document.querySelector('.toggle-password i');
     
     if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
-        toggleBtn.textContent = '🙈';
+        toggleBtn.className = 'fas fa-eye-slash';
     } else {
         passwordInput.type = 'password';
-        toggleBtn.textContent = '👁️';
+        toggleBtn.className = 'fas fa-eye';
     }
 }
 
