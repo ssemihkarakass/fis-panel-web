@@ -364,6 +364,9 @@ async function loadUsers() {
                 <td>${formatCurrency(user.total_amount || 0)}</td>
                 <td>${formatDateTime(user.last_seen)}</td>
                 <td>
+                    <button class="btn btn-sm btn-primary" onclick="window.viewUserDetail(${user.id})" style="margin-right: 5px;">
+                        <span class="material-icons" style="font-size: 1rem;">visibility</span> Detay
+                    </button>
                     <button class="btn btn-sm btn-danger" onclick="window.deleteUser(${user.id}, '${user.pc_name}')">
                         <span class="material-icons" style="font-size: 1rem;">delete</span> Sil
                     </button>
@@ -604,32 +607,147 @@ function togglePassword() {
 // Make togglePassword global
 window.togglePassword = togglePassword;
 
-// View license detail
+// View license detail (ULTRA DETAYLI)
 async function viewLicenseDetail(licenseId) {
     currentLicenseId = licenseId; // Set global ID
     
     try {
-        const response = await fetchAPI(`/api/admin/licenses/${licenseId}`);
-        const license = response.data;
+        const response = await fetchAPI(`/api/admin/licenses/${licenseId}/details`);
+        const { license, users, companies, activities, daily_stats } = response.data;
         
         const modal = document.getElementById('license-detail-modal');
         const content = document.getElementById('license-detail-content');
         
         content.innerHTML = `
-            <div style="display: grid; gap: 1rem;">
-                <div><strong>Lisans Anahtarı:</strong> <code>${license.license_key}</code></div>
-                <div><strong>Şirket:</strong> ${license.company_name || '-'}</div>
-                <div><strong>E-posta:</strong> ${license.contact_email || '-'}</div>
-                <div><strong>Telefon:</strong> ${license.contact_phone || '-'}</div>
-                <div><strong>Durum:</strong> <span class="badge badge-${license.status}">${getStatusText(license.status)}</span></div>
-                <div><strong>Kalan Gün:</strong> ${license.days_remaining || 0} gün</div>
-                <div><strong>Maksimum Cihaz:</strong> ${license.max_devices}</div>
-                <div><strong>Aktif Cihaz:</strong> ${license.active_devices || 0}</div>
-                <div><strong>Oluşturulma:</strong> ${formatDateTime(license.created_at)}</div>
-                <div><strong>Son Kontrol:</strong> ${formatDateTime(license.last_check)}</div>
-                <div><strong>Notlar:</strong> ${license.notes || '-'}</div>
+            <div class="detail-section">
+                <h3><span class="material-icons">vpn_key</span> Lisans Bilgileri</h3>
+                <div class="detail-grid">
+                    <div><strong>Lisans Anahtarı:</strong> <code>${license.license_key}</code></div>
+                    <div><strong>Şirket:</strong> ${license.company_name || '-'}</div>
+                    <div><strong>E-posta:</strong> ${license.contact_email || '-'}</div>
+                    <div><strong>Telefon:</strong> ${license.contact_phone || '-'}</div>
+                    <div><strong>Durum:</strong> <span class="badge ${license.status === 'active' ? 'badge-success' : 'badge-danger'}">${license.status}</span></div>
+                    <div><strong>Kalan Gün:</strong> ${license.days_remaining} gün</div>
+                    <div><strong>Bitiş Tarihi:</strong> ${formatDate(license.expires_at)}</div>
+                    <div><strong>Maks. Cihaz:</strong> ${license.max_devices}</div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h3><span class="material-icons">devices</span> Kullanıcılar (${users.length})</h3>
+                <table class="detail-table">
+                    <thead>
+                        <tr>
+                            <th>PC Adı</th>
+                            <th>Durum</th>
+                            <th>Toplam Fiş</th>
+                            <th>Toplam Ciro</th>
+                            <th>Son Görülme</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${users.map(u => `
+                            <tr>
+                                <td>${u.pc_name}</td>
+                                <td><span class="badge ${u.is_online ? 'badge-success' : 'badge-secondary'}">${u.is_online ? 'Online' : 'Offline'}</span></td>
+                                <td>${u.total_receipts || 0}</td>
+                                <td>${formatCurrency(u.total_amount || 0)}</td>
+                                <td>${formatDateTime(u.last_seen)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="detail-section">
+                <h3><span class="material-icons">business</span> Firma Bazlı İstatistikler (${companies.length})</h3>
+                <table class="detail-table">
+                    <thead>
+                        <tr>
+                            <th>Firma Adı</th>
+                            <th>Toplam Fiş</th>
+                            <th>Toplam Tutar</th>
+                            <th>İlk Fiş</th>
+                            <th>Son Fiş</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${companies.map(c => `
+                            <tr>
+                                <td><strong>${c.company_name}</strong></td>
+                                <td>${c.total_receipts}</td>
+                                <td>${formatCurrency(c.total_amount)}</td>
+                                <td>${formatDateTime(c.first_receipt_date)}</td>
+                                <td>${formatDateTime(c.last_receipt_date)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="detail-section">
+                <h3><span class="material-icons">show_chart</span> Son 30 Gün Grafiği</h3>
+                <canvas id="license-chart" style="max-height: 300px;"></canvas>
+            </div>
+            
+            <div class="detail-section">
+                <h3><span class="material-icons">list</span> Son Aktiviteler (Son 20)</h3>
+                <div class="activity-list">
+                    ${activities.slice(0, 20).map(a => `
+                        <div class="activity-item">
+                            <span class="activity-icon ${a.action_type === 'receipt_print' ? 'icon-receipt' : a.action_type === 'login' ? 'icon-login' : 'icon-other'}">
+                                <span class="material-icons">${a.action_type === 'receipt_print' ? 'receipt' : a.action_type === 'login' ? 'login' : 'logout'}</span>
+                            </span>
+                            <div class="activity-details">
+                                <strong>${a.action_details}</strong>
+                                ${a.pc_name ? `<br><small>PC: ${a.pc_name}</small>` : ''}
+                                ${a.company_name ? `<br><small>Firma: ${a.company_name}</small>` : ''}
+                                ${a.amount ? `<br><small>Tutar: ${formatCurrency(a.amount)}</small>` : ''}
+                                <br><small>${formatDateTime(a.created_at)}</small>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
             </div>
         `;
+        
+        // Grafik çiz
+        setTimeout(() => {
+            const ctx = document.getElementById('license-chart');
+            if (ctx && daily_stats.length > 0) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: daily_stats.reverse().map(s => formatDate(s.stat_date)),
+                        datasets: [{
+                            label: 'Günlük Ciro',
+                            data: daily_stats.map(s => parseFloat(s.amount || 0)),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }, 100);
         
         showModal('license-detail-modal');
         
@@ -666,6 +784,106 @@ async function deleteUser(userId, pcName) {
 }
 
 window.deleteUser = deleteUser;
+
+// Kullanıcı detayını göster
+async function viewUserDetail(userId) {
+    try {
+        const response = await fetchAPI(`/api/admin/users/${userId}/details`);
+        const { user, sessions, activities, companies } = response.data;
+        
+        const modal = document.getElementById('user-detail-modal');
+        const content = document.getElementById('user-detail-content');
+        
+        content.innerHTML = `
+            <div class="detail-section">
+                <h3><span class="material-icons">person</span> Kullanıcı Bilgileri</h3>
+                <div class="detail-grid">
+                    <div><strong>PC Adı:</strong> ${user.pc_name}</div>
+                    <div><strong>Lisans:</strong> <code>${user.license_key}</code></div>
+                    <div><strong>Durum:</strong> <span class="badge ${user.is_online ? 'badge-success' : 'badge-secondary'}">${user.is_online ? 'Online' : 'Offline'}</span></div>
+                    <div><strong>Toplam Fiş:</strong> ${user.total_receipts || 0}</div>
+                    <div><strong>Toplam Ciro:</strong> ${formatCurrency(user.total_amount || 0)}</div>
+                    <div><strong>Son Görülme:</strong> ${formatDateTime(user.last_seen)}</div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h3><span class="material-icons">history</span> Oturum Geçmişi (Son 10)</h3>
+                <table class="detail-table">
+                    <thead>
+                        <tr>
+                            <th>Başlangıç</th>
+                            <th>Bitiş</th>
+                            <th>Fiş Sayısı</th>
+                            <th>Tutar</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${sessions.slice(0, 10).map(s => `
+                            <tr>
+                                <td>${formatDateTime(s.session_start)}</td>
+                                <td>${s.session_end ? formatDateTime(s.session_end) : '<span class="badge badge-success">Aktif</span>'}</td>
+                                <td>${s.total_receipts || 0}</td>
+                                <td>${formatCurrency(s.total_amount || 0)}</td>
+                                <td><span class="badge ${s.status === 'active' ? 'badge-success' : 'badge-secondary'}">${s.status}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="detail-section">
+                <h3><span class="material-icons">business</span> Firma Bazlı İstatistikler</h3>
+                <table class="detail-table">
+                    <thead>
+                        <tr>
+                            <th>Firma Adı</th>
+                            <th>Fiş Sayısı</th>
+                            <th>Toplam Tutar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${companies.map(c => `
+                            <tr>
+                                <td><strong>${c.company_name}</strong></td>
+                                <td>${c.receipt_count}</td>
+                                <td>${formatCurrency(c.total_amount)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="detail-section">
+                <h3><span class="material-icons">list</span> Son Aktiviteler (Son 20)</h3>
+                <div class="activity-list">
+                    ${activities.slice(0, 20).map(a => `
+                        <div class="activity-item">
+                            <span class="activity-icon ${a.action_type === 'receipt_print' ? 'icon-receipt' : a.action_type === 'login' ? 'icon-login' : 'icon-other'}">
+                                <span class="material-icons">${a.action_type === 'receipt_print' ? 'receipt' : a.action_type === 'login' ? 'login' : 'logout'}</span>
+                            </span>
+                            <div class="activity-details">
+                                <strong>${a.action_details}</strong>
+                                ${a.company_name ? `<br><small>Firma: ${a.company_name}</small>` : ''}
+                                ${a.amount ? `<br><small>Tutar: ${formatCurrency(a.amount)}</small>` : ''}
+                                <br><small>${formatDateTime(a.created_at)}</small>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+        showModal('user-detail-modal');
+        
+    } catch (error) {
+        console.error('User detail error:', error);
+        alert('Kullanıcı detayı yüklenemedi');
+    }
+}
+
+window.viewUserDetail = viewUserDetail;
 
 // Global license ID for modal actions
 let currentLicenseId = null;
